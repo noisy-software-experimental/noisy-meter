@@ -1,0 +1,22 @@
+refresh_rate: 10 seconds
+appenders:
+    file:
+        kind: rolling_file
+        path: "./log/logs_0.log"
+        encoder:
+            pattern: "{d(%Y-%m-%d %H:%M:%S)(utc)} - {l}: {m}{n}"
+        policy:
+            trigger:
+                kind: size
+                limit: 1000kb
+            roller:
+                kind: fixed_window
+                base: 1
+                count: 2
+                pattern: "log/logs_{}.log"
+
+loggers:
+    noisy_sound_level_meter_connector:
+        level: info
+        appenders:
+            - file
