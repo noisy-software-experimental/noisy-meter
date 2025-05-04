@@ -30,9 +30,6 @@ pub async fn connect() -> Option<(Stream, Caching<Arc<SharedRb<Heap<f32>>>, fals
         log::warn!("UMIK-1: Failed to start the stream: {}", err);
         return None;
     }
-
-    log::info!("UMIK-1: Connected and stream started successfully.");
-
     Some((input_stream, consumer, calibration_data))
 }
 
@@ -108,7 +105,7 @@ fn initialise_input_stream(
                  log::warn!("UMIK-1: Failed to start stream: {}", err);
                 None
             } else {
-                 log::warn!("UMIK-1: Connected and stream started successfully.");
+                 log::info!("UMIK-1: Connected");
                 Some(stream)
             }
         }

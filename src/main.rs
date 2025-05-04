@@ -14,20 +14,12 @@ mod domain {
     pub mod types;
 }
 
-
-
-
 #[tokio::main]
 async fn main() {
-
-    if let Err(e) = log4rs::init_file("log.yml", Default::default()) {
-        eprintln!("Failed to initialize logger: {}", e);
-        return;
-    }
-    log::info!("Noisy Sound Level Meter Connector");
+    log4rs::init_file("./log.yml", Default::default()).unwrap();
+    log::info!("Noisy USB Sound Level Meter");
 
     if let Some((_stream, mut consumer, mic_cal_data)) = umik_1::connect().await {
-        log::info!("UMIK-1: connected");
         let weightings = generate_weightings((48000.0 * 2.0) as usize , 48000.0, mic_cal_data);
 
         let now = Utc::now();
@@ -44,7 +36,11 @@ async fn main() {
                 //println!("{}", now);
                 let data: Vec<f32> = consumer.pop_iter().take(48_000).collect();
                 match dsp::process_raw_data(data, weightings.clone()){
-                    Ok((spl_z, spl_a, spl_c)) => println!("{:?} : {} dB(Z) | {} dB(A) | {} dB(C)| ", now, spl_z, spl_a  ,spl_c),
+                    Ok((spl_z, spl_a, spl_c)) => {
+                        log::info!("{} dB(Z) | {} dB(A) | {} dB(C)|", spl_z, spl_a, spl_c);
+                        println!("{:?} : {} dB(Z) | {} dB(A) | {} dB(C)| ", now, spl_z, spl_a  ,spl_c);
+                    }
+
                     Err(e) => println!("{:?}", e),
                 };
 
