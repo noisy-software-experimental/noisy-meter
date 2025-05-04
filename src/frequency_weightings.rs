@@ -1,10 +1,6 @@
 use crate::domain::types::{MicCalibrationData, Weightings};
 
 
-
-
-
-
 pub fn generate_weightings(fft_size: usize, sample_rate: f32, mic_cal_data: MicCalibrationData) -> Weightings{
     return Weightings {
             a_weighting:  generate_a_weighting_gains(fft_size, sample_rate),
@@ -13,7 +9,7 @@ pub fn generate_weightings(fft_size: usize, sample_rate: f32, mic_cal_data: MicC
     }
 }
 
-pub fn generate_a_weighting_gains(fft_size: usize, sample_rate: f32) -> Vec<f32> {
+fn generate_a_weighting_gains(fft_size: usize, sample_rate: f32) -> Vec<f32> {
     let nyquist = sample_rate / 2.0;
     let bin_count = fft_size / 2; // For real FFT
     let mut gains = Vec::with_capacity(bin_count);
@@ -33,11 +29,10 @@ pub fn generate_a_weighting_gains(fft_size: usize, sample_rate: f32) -> Vec<f32>
         let gain = 10f32.powf(a_db / 20.0);
         gains.push(gain);
     }
-    println!("A-weighting gains: {:?}", gains);
     gains
 }
 
-pub fn generate_c_weighting_gains(fft_size: usize, sample_rate: f32) -> Vec<f32> {
+fn generate_c_weighting_gains(fft_size: usize, sample_rate: f32) -> Vec<f32> {
     let nyquist = sample_rate / 2.0;
     let bin_count = fft_size / 2;
     let mut gains = Vec::with_capacity(bin_count);
@@ -53,7 +48,6 @@ pub fn generate_c_weighting_gains(fft_size: usize, sample_rate: f32) -> Vec<f32>
         let gain = 10f32.powf(c_db / 20.0);
         gains.push(gain);
     }
-
     gains
 }
 

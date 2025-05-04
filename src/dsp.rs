@@ -3,9 +3,9 @@ use num::complex::Complex;
 use rustfft::FftPlanner;
 use spectrum_analyzer::windows::hamming_window;
 
-use crate::domain::types::{MicCalibrationData, Weightings};
+use crate::domain::types::Weightings;
 
-pub fn process_raw_data(mut raw_time_domain_data: Vec<f32>, weightings: Weightings) -> Result<(f32,f32,f32),()>{
+pub fn process_raw_data(raw_time_domain_data: Vec<f32>, weightings: Weightings) -> Result<(f32,f32,f32),()>{
     if raw_time_domain_data.len() != 48_000 {
         println!("To few samples");
         return Err(());
@@ -48,9 +48,9 @@ fn to_freq_domain(mut raw_time_domain_data: Vec<f32>) -> Vec<Complex<f32>> {
     let downsampled_fft:  Vec<Complex<f32>> = buffer.into_iter().take(original_len).collect();
     let modified_fft: Vec<Complex<f32>> = downsampled_fft.into_iter()
             .map(|mut c| {
-                c.re *= 1.414; // Multiply real part by sqrt(2)
-                c.im *= 1.414; // Multiply imaginary part by sqrt(2)
-                c // Return the modified complex number
+                c.re *= 1.414;
+                c.im *= 1.414;
+                c
             })
             .collect();
     modified_fft
@@ -68,7 +68,7 @@ fn to_time_domain(calibrated_freq_domain_data: &mut Vec<Complex<f32>>) -> Vec<f3
 
 fn apply_weighting(
     mut raw_freq_domain_data: Vec<Complex<f32>>,
-    weighting: &[f32], // use a reference to avoid unnecessary clone
+    weighting: &[f32],
 ) -> Vec<Complex<f32>> {
     let fft_size = raw_freq_domain_data.len();
     let half_size = weighting.len(); // expected to be fft_size / 2 + 1
@@ -81,10 +81,7 @@ fn apply_weighting(
     );
 
     for (i, &gain) in weighting.iter().enumerate() {
-        // Apply to positive frequency bin
         raw_freq_domain_data[i] *= gain;
-
-        // Apply to the mirrored bin (negative frequency), except DC and Nyquist
         if i != 0 && i != fft_size / 2 {
             let mirror_index = fft_size - i;
             if mirror_index < fft_size {
@@ -105,18 +102,10 @@ fn apply_hamming_window(data: &mut [f32]) {
 
 
 fn calculate_leq(samples: &[f32]) -> f32 {
-    println!("{:?}",samples[1]);
-    // Reference pressure in Pascals (typically 20 µPa)
     let p_ref = 20e-6;
-
-    // Calculate the mean square of the samples
     let sum_squares: f32 = samples.iter().map(|&x| x * x).sum();
     let mean_square = sum_squares / samples.len() as f32;
-
-    // Calculate the root mean square (RMS) pressure
     let rms_pressure = mean_square.sqrt();
-
-    // Calculate the sound pressure level (SPL) in dB
     let spl = 20.0 * (rms_pressure / p_ref).log10() + 33.6;
     spl
 }
