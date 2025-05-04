@@ -16,7 +16,11 @@ appenders:
                 pattern: "log/logs_{}.log"
 
 loggers:
-    noisy_sound_level_meter_connector:
+    mini-dsp-mic:
+        level: trace
+        appenders:
+            - file
+    root:
         level: info
         appenders:
             - file
