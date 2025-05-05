@@ -1,2 +1,3 @@
-# mini-dsp-mic
- development of mini-dsp mic software
+# noisy_meter
+
+Mini-dsp mic integration
